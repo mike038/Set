@@ -25,7 +25,7 @@ bool set_removeValue(Type, Set);
 void set_printPreOrder(Set);
 void set_printInOrder(Set);
 void set_printPostOrder(Set);
-void set_destroy(Set);
+bool set_destroy(Set);
 
 int compareInts(Type, Type);
 

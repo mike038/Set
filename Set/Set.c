@@ -32,7 +32,8 @@ Type set_remove_min(Node n, Set s);
 void set_printPreO(Node n);
 void set_printInO(Node n);
 void set_printPostO(Node n);
-void set_dest(Node n, Set s);
+bool set_agr(Set s, Node n, Type t);
+bool set_dest(Node n, Set s);
 
 //variables globales
 int verbose = 0; //en 1 para imprimir, en 0 para no imprimir
@@ -138,34 +139,34 @@ bool set_containsValue(Type X, Set s) {
 }
 
 bool set_agr(Set s, Node n, Type t) {
-	if (s->comparefunc(t, n->data) < 0 && n->left != NULL) {
-		printf("Para la izquierda\n"); //Imprimir que esta pasando
+	//Checa si el numero es menor al nodo recibido y tambien checa si el nodo tiene hijo a la izquierda
+	if (s->comparefunc(t, n->data) < 0 && n->left != NULL)
 		return set_agr(s, n->left, t);
-	}
-	if (s->comparefunc(t, n->data) > 0 && n->right != NULL) {
-		printf("Para la derecha\n");	//Imprimir que esta pasando
-		return set_agr(s, n->right, t);
-	}
 
+	//Checa si el numero es mayor al nodo recibido y tambien checa si el nodo tiene hijo a la derecha
+	if (s->comparefunc(t, n->data) > 0 && n->right != NULL)
+		return set_agr(s, n->right, t);
+	//Si llega aqui, ya se tiene el nodo donde se va a agregar el nuevo numero
 	printf("Se llega al nodo donde se deberia de agregar la hoja\n");
+	//Creacion del nodo
 	Node newNode = malloc(sizeof(struct stNode));
 	printf("Se creo el nodo con memoria dinamica\n");
 	newNode->left = NULL;
 	newNode->right = NULL;
 	newNode->data = t;
 	newNode->father = n;
-	if (s->comparefunc(t, n->data) < 0) {
+	//Checa si es menor y lo pone a la izquierda, de no serlo lo pone a la derecha
+	if (s->comparefunc(t, n->data) < 0)
 		n->left = newNode;
-		printf("Se agrega nuevo nodo a la izquierda\n"); //Imprimir que esta pasando
-	} else {
+	else
 		n->right = newNode;
-		printf("Se agrega nuevo nodo a la derecha\n");//Imprimir que esta pasando
-	}
+
 	s->size++;
 	return true;
 }
 
 bool set_agregar(Set s, Type t) {
+	//Checa si ya existe en el arbol
 	if (set_containsValue(t, s))
 		return false;
 	else
@@ -317,20 +318,28 @@ void set_printPostOrder(Set s) {
 	set_printPostO(s->root);
 }
 
-void set_dest(Node n, Set s) {
-	Node r = s->root;
-	if (n != NULL) {
-		if (n->left)
-			set_dest(n->left, s);
-		if (n->right)
-			set_dest(n->right, s);
-		set_removeValue(n->data, s);
-		set_dest(r, s);
+bool set_dest(Node n, Set s) {
+	//Se recorre para tener los valores similares a los de POSTORDER
+	//Para que asi el ultimo dato a eliminar es el root
+	if (n->left)
+		return set_dest(n->left, s);
+	if (n->right)
+		return set_dest(n->right, s);
+	//Si llega aqui, ya encontro el primer dato en el orden POSTORDER
+	//Lo manda a elminar
+	set_removeValue(n->data, s);
+	//Si en el arbol queda algun nodo que no sea el ROOT reinicia la funcion
+	if (s->size > 1) {
+		return set_dest(s->root, s);
 	}
-
+	//Si llega aqui, solo queda el root en el arbol
+	//Se usa free para eliminar el nodo y el arbol
+	free(s->root);
+	free(s);
+	return true;
 }
 
-void set_destroy(Set s) {
-	set_dest(s->root, s);
+bool set_destroy(Set s) {
+	return set_dest(s->root, s);
 }
 
