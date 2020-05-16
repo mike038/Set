@@ -17,14 +17,15 @@ typedef int (*CompareFunc) (Type, Type);
 
 //methods
 Set set_create(CompareFunc);
-int set_size(Set s);
-bool set_add(Set s, Type t);
-bool set_containsValue(Type X, Set s);
-bool set_removeValue(Type t, Set s);
-void set_printPreOrder(Set s);
-void set_printInOrder(Set s);
-void set_printPostOrder(Set s);
-bool set_destroy(Set s);
+int set_size(Set);
+bool set_add(Set, Type);
+bool set_agregar(Set, Type);
+bool set_containsValue(Type, Set);
+bool set_removeValue(Type, Set);
+void set_printPreOrder(Set);
+void set_printInOrder(Set);
+void set_printPostOrder(Set);
+void set_destroy(Set);
 
 int compareInts(Type, Type);
 

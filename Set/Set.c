@@ -32,9 +32,10 @@ Type set_remove_min(Node n, Set s);
 void set_printPreO(Node n);
 void set_printInO(Node n);
 void set_printPostO(Node n);
+void set_dest(Node n, Set s);
 
 //variables globales
-int verbose = 1; //en 1 para imprimir, en 0 para no imprimir
+int verbose = 0; //en 1 para imprimir, en 0 para no imprimir
 
 Set set_create(CompareFunc cf) {
 	Set s = malloc(sizeof(struct stSet));
@@ -134,6 +135,42 @@ bool set_contains(Type X, Node n, Set s) {
 
 bool set_containsValue(Type X, Set s) {
 	return set_contains(X, s->root, s);
+}
+
+bool set_agr(Set s, Node n, Type t) {
+	if (s->comparefunc(t, n->data) < 0 && n->left != NULL) {
+		printf("Para la izquierda\n"); //Imprimir que esta pasando
+		return set_agr(s, n->left, t);
+	}
+	if (s->comparefunc(t, n->data) > 0 && n->right != NULL) {
+		printf("Para la derecha\n");	//Imprimir que esta pasando
+		return set_agr(s, n->right, t);
+	}
+
+	printf("Se llega al nodo donde se deberia de agregar la hoja\n");
+	Node newNode = malloc(sizeof(struct stNode));
+	printf("Se creo el nodo con memoria dinamica\n");
+	newNode->left = NULL;
+	newNode->right = NULL;
+	newNode->data = t;
+	newNode->father = n;
+	if (s->comparefunc(t, n->data) < 0) {
+		n->left = newNode;
+		printf("Se agrega nuevo nodo a la izquierda\n"); //Imprimir que esta pasando
+	} else {
+		n->right = newNode;
+		printf("Se agrega nuevo nodo a la derecha\n");//Imprimir que esta pasando
+	}
+	s->size++;
+	return true;
+}
+
+bool set_agregar(Set s, Type t) {
+	if (set_containsValue(t, s))
+		return false;
+	else
+		set_agr(s, s->root, t);
+	return true;
 }
 
 Type set_remove_min(Node n, Set s) {
@@ -236,6 +273,7 @@ bool set_removeValue(Type t, Set s) {
 	return set_remove(t, s->root, s);
 }
 
+//PREORDER
 void set_printPreO(Node n) {
 	if (n != NULL) {
 		printf("%d, ", *(int*) n->data);
@@ -250,27 +288,49 @@ void set_printPreOrder(Set s) {
 	set_printPreO(s->root);
 }
 
+//INORDER
 void set_printInO(Node n) {
-	if (n == NULL)
-		return;
-	set_printInO(n->left);
-	printf("%d, ", *(int*) n->data);
-	set_printInO(n->right);
+	if (n != NULL) {
+		if (n->left)
+			set_printInO(n->left);
+		printf("%d, ", *(int*) n->data);
+		if (n->right)
+			set_printInO(n->right);
+	}
 }
 
 void set_printInOrder(Set s) {
 	set_printInO(s->root);
 }
 
+//POSTORDER
 void set_printPostO(Node n) {
-	if (n == NULL)
-		return;
-	set_printPostO(n->left);
-	set_printPostO(n->right);
-	printf("%d ", *(int*) n->data);
+	if (n != NULL) {
+		if (n->left)
+			set_printPostO(n->left);
+		if (n->right)
+			set_printPostO(n->right);
+		printf("%d, ", *(int*) n->data);
+	}
 }
-void set_printPostOrder(Set s){
+void set_printPostOrder(Set s) {
 	set_printPostO(s->root);
 }
-//bool set_destroy(Set s);
+
+void set_dest(Node n, Set s) {
+	Node r = s->root;
+	if (n != NULL) {
+		if (n->left)
+			set_dest(n->left, s);
+		if (n->right)
+			set_dest(n->right, s);
+		set_removeValue(n->data, s);
+		set_dest(r, s);
+	}
+
+}
+
+void set_destroy(Set s) {
+	set_dest(s->root, s);
+}
 
