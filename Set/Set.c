@@ -147,10 +147,8 @@ bool set_agr(Set s, Node n, Type t) {
 	if (s->comparefunc(t, n->data) > 0 && n->right != NULL)
 		return set_agr(s, n->right, t);
 	//Si llega aqui, ya se tiene el nodo donde se va a agregar el nuevo numero
-	printf("Se llega al nodo donde se deberia de agregar la hoja\n");
 	//Creacion del nodo
 	Node newNode = malloc(sizeof(struct stNode));
-	printf("Se creo el nodo con memoria dinamica\n");
 	newNode->left = NULL;
 	newNode->right = NULL;
 	newNode->data = t;
